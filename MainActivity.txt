@@ -1,0 +1,160 @@
+package com.example.tic_tacapp
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.provider.Settings
+import android.view.View
+import android.widget.Button
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var gameClass: GameClass
+    private lateinit var btn1: Button
+    private lateinit var btn2: Button
+    private lateinit var btn3: Button
+    private lateinit var btn4: Button
+    private lateinit var btn5: Button
+    private lateinit var btn6: Button
+    private lateinit var btn7: Button
+    private lateinit var btn8: Button
+    private lateinit var btn9: Button
+    private lateinit var plagain: TextView
+    private lateinit var player1: TextView
+    private lateinit var player2: TextView
+
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        gameClass = GameClass()
+
+        btn1 = findViewById(R.id.button1)
+        btn2 = findViewById(R.id.button2)
+        btn3 = findViewById(R.id.button3)
+        btn4 = findViewById(R.id.button4)
+        btn5 = findViewById(R.id.button5)
+        btn6 = findViewById(R.id.button6)
+        btn7 = findViewById(R.id.button7)
+        btn8 = findViewById(R.id.button8)
+        btn9 = findViewById(R.id.button9)
+        plagain = findViewById(R.id.playAgain)
+        player1 = findViewById(R.id.Player1)
+        player2 = findViewById(R.id.Player2)
+        val intent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.parse("package:$packageName")
+        )
+        intent.addCategory(Intent.CATEGORY_DEFAULT)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+
+
+        btn1.setOnClickListener { onClicked(btn1, Position(0, 0)) }
+        btn2.setOnClickListener { onClicked(btn2, Position(0, 1)) }
+        btn3.setOnClickListener { onClicked(btn3, Position(0, 2)) }
+        btn4.setOnClickListener { onClicked(btn4, Position(1, 0)) }
+        btn5.setOnClickListener { onClicked(btn5, Position(1, 1)) }
+        btn6.setOnClickListener { onClicked(btn6, Position(1, 2)) }
+        btn7.setOnClickListener { onClicked(btn7, Position(2, 0)) }
+        btn8.setOnClickListener { onClicked(btn8, Position(2, 1)) }
+        btn9.setOnClickListener { onClicked(btn9, Position(2, 2)) }
+
+        plagain.setOnClickListener {
+            gameClass.reset()
+            reset()
+        }
+
+        Points()
+    }
+
+
+
+    private fun reset() {
+        btn1.text = ""
+        btn2.text = ""
+        btn3.text = ""
+        btn4.text = ""
+        btn5.text = ""
+        btn6.text = ""
+        btn7.text = ""
+        btn8.text = ""
+        btn9.text = ""
+        btn1.background = null
+        btn2.background = null
+        btn3.background = null
+        btn4.background = null
+        btn5.background = null
+        btn6.background = null
+        btn7.background = null
+        btn8.background = null
+        btn9.background = null
+        btn1.isEnabled = true
+        btn2.isEnabled = true
+        btn3.isEnabled = true
+        btn4.isEnabled = true
+        btn5.isEnabled = true
+        btn6.isEnabled = true
+        btn7.isEnabled = true
+        btn8.isEnabled = true
+        btn9.isEnabled = true
+    }
+    private fun Points() {
+        player1.text = "${gameClass.player1Points}"
+        player2.text = "${gameClass.player2Points}"
+    }
+
+
+    private fun onClicked(box: TextView, position: Position) {
+        if (box.text.isEmpty()) {
+            box.text = gameClass.currentPlayerMark
+            val winningLine = gameClass.makeMove(position)
+            if (winningLine != null) {
+                Points()
+                disableBoxes()
+                plagain.visibility = View.VISIBLE
+                showWinner(winningLine)
+            }
+        }
+    }
+
+    private fun disableBoxes() {
+        btn1.isEnabled = false
+        btn2.isEnabled = false
+        btn3.isEnabled = false
+        btn4.isEnabled = false
+        btn5.isEnabled = false
+        btn6.isEnabled = false
+        btn7.isEnabled = false
+        btn8.isEnabled = false
+        btn9.isEnabled = false
+    }
+
+    private fun showWinner(winningLine: WinningLine) {
+        val (winningBoxes, background) = when (winningLine) {
+            WinningLine.ROW_0 -> Pair(listOf(btn1, btn2, btn3), R.drawable.horizonatal_line)
+            WinningLine.ROW_1 -> Pair(listOf(btn4, btn5, btn6), R.drawable.horizonatal_line)
+            WinningLine.ROW_2 -> Pair(listOf(btn7, btn8, btn9), R.drawable.horizonatal_line)
+            WinningLine.COLUMN_0 -> Pair(listOf(btn1, btn4, btn7), R.drawable.vertical_line)
+            WinningLine.COLUMN_1 -> Pair(listOf(btn2, btn5, btn8), R.drawable.vertical_line)
+            WinningLine.COLUMN_2 -> Pair(listOf(btn3, btn6, btn9), R.drawable.vertical_line)
+            WinningLine.DIAGONAL_LEFT -> Pair(listOf(btn1, btn5, btn9),
+                    R.drawable.left_diagonal
+            )
+            WinningLine.DIAGONAL_RIGHT -> Pair(listOf(btn3, btn5, btn7),
+                    R.drawable.right_diagonal
+            )
+            else -> return
+        }
+
+        winningBoxes.forEach { box ->
+            box.background = ContextCompat.getDrawable(this, background)
+        }
+    }
+}
+
+
